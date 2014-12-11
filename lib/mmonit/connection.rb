@@ -41,25 +41,34 @@ module MMonit
 			self.request('/z_security_check', "z_username=#{@username}&z_password=#{@password}").code.to_i == 302
 		end
 
-		def status
-			JSON.parse(self.request('/json/status/list').body)['records']
+    # TODO: filter arguments
+		def status_overview
+			JSON.parse(self.get('/status/hosts/list').body)['records']
+		end
+
+		# TODO: get by id
+		def status(id)
+    end
+
+		def status_summary
+			JSON.parse(self.get('/status/hosts/summary').body)
 		end
 
 		def hosts
-			JSON.parse(self.request('/json/admin/hosts/list').body)['records']
+			JSON.parse(self.get('/admin/hosts/list').body)['records']
 		end
 
-		def users
-			JSON.parse(self.request('/json/admin/users/list').body)
-		end
+		#def users
+			#JSON.parse(self.request('/json/admin/users/list').body)
+		#end
 
-		def alerts
-			JSON.parse(self.request('/json/admin/alerts/list').body)
-		end
+		#def alerts
+			#JSON.parse(self.request('/json/admin/alerts/list').body)
+		#end
 
-		def events
-			JSON.parse(self.request('/json/events/list').body)['records']
-		end
+		#def events
+			#JSON.parse(self.request('/json/events/list').body)['records']
+		#end
 
 		####  topography and reports are disabled until I figure out their new equivalent in M/Monit
 		# def topography
@@ -72,25 +81,28 @@ module MMonit
 		# 	JSON.parse(self.request('/json/reports/overview', body).body)
 		# end
 
-		def find_host(fqdn)
-			host = self.hosts.select{ |h| h['host'] == fqdn }
+		def find_host_by_hostname(fqdn)
+			host = self.hosts.select{ |h| h['hostname'] == fqdn }
 			host.empty? ? nil : host.first
 		end
 
 		# another option:  /admin/hosts/json/get?id=####
 		def get_host_details(id)
-			JSON.parse(self.request("/json/status/detail?hostid=#{id}").body)['records']['host'] rescue nil
+			JSON.parse(self.get("/admin/hosts/get?id=#{id}").body) rescue nil
 		end
 
-		def delete_host(host)
-			host = self.find_host(host['host']) if host.key?('host') && ! host.key?('id')
-			return false unless host['id']
-			self.request("/admin/hosts/delete?id=#{host['id']}")
+		def delete_host(id)
+			self.request("/admin/hosts/delete?id=#{id}")
 		end
 
 		def request(path, body="", headers = {})
 			self.connect unless @http.is_a?(Net::HTTP)
 			@http.post(path, body, @headers.merge(headers))
 		end
+
+		def get(path, headers = {})
+			self.connect unless @http.is_a?(Net::HTTP)
+			@http.get(path, @headers.merge(headers))
+    end
 	end
 end
