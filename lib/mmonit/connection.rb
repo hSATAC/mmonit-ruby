@@ -93,7 +93,7 @@ module MMonit
 
     # Now mmonit requires csrf_token for some actions
     def get_csrf_token
-      JSON.parse(mmonit.get("/session/get?key=CSRFToken").body)["CSRFToken"]
+      JSON.parse(self.get("/session/get?key=CSRFToken").body)["CSRFToken"]
     end
 
     def delete_host(id)
