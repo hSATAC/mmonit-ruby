@@ -97,7 +97,7 @@ module MMonit
     end
 
     def delete_host(id)
-      self.request("/admin/hosts/delete?id=#{id}","",{ "CSRFToken" => csrf_token})
+      self.request("/admin/hosts/delete?id=#{id}","",{ "CSRFToken" => self.get_csrf_token})
     end
 
     def request(path, body="", headers = {})
